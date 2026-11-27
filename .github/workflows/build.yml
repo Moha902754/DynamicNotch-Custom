@@ -7,15 +7,41 @@ on:
 
 jobs:
   build-dmg:
-    runs-on: macos-latest
+    runs-on: macos-26
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Select latest Xcode
+        run: |
+          LATEST_XCODE=$(ls -d /Applications/Xcode*.app | sort -V | tail -n 1)
+          echo "Using $LATEST_XCODE"
+          sudo xcode-select -s "$LATEST_XCODE/Contents/Developer"
+          xcodebuild -version
+
       - name: Build DMG
         run: |
-          chmod +x build_dmg.sh
-          ./build_dmg.sh
+          xcodebuild \
+            -resolvePackageDependencies \
+            -project DynamicNotch.xcodeproj \
+            -scheme DynamicNotch
+
+          xcodebuild \
+            -project DynamicNotch.xcodeproj \
+            -scheme DynamicNotch \
+            -configuration Release \
+            -destination "platform=macOS" \
+            -derivedDataPath build/DerivedData \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO \
+            DEVELOPMENT_TEAM="" \
+            build
+
+          mkdir -p build/dmg staging
+          ditto "build/DerivedData/Build/Products/Release/DynamicNotch.app" "staging/DynamicNotch.app"
+          ln -s /Applications "staging/Applications"
+          hdiutil create -volname "DynamicNotch" -srcfolder "staging" -ov -format UDZO "build/dmg/DynamicNotch.dmg"
 
       - name: Upload DynamicNotch.dmg
         uses: actions/upload-artifact@v4
