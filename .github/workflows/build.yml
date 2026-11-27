@@ -46,6 +46,18 @@ jobs:
           ln -s /Applications "staging/Applications"
           hdiutil create -volname "DynamicNotch" -srcfolder "staging" -ov -format UDZO "build/dmg/DynamicNotch.dmg"
 
+      - name: Extract errors on failure
+        if: failure()
+        run: |
+          grep -B 2 -A 5 "error:" build.log > build-errors.txt || tail -n 60 build.log > build-errors.txt
+
+      - name: Upload build-errors.txt
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-errors
+          path: build-errors.txt
+
       - name: Upload DynamicNotch.dmg
         uses: actions/upload-artifact@v4
         with:
