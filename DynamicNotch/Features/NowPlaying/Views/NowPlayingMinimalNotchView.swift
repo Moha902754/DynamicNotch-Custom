@@ -32,9 +32,9 @@ struct NowPlayingMinimalNotchView: View {
         HStack {
             ArtworkView(
                 nowPlayingViewModel: nowPlayingViewModel,
-                width: isNotchlessScreen ? 20 : 22,
-                height: isNotchlessScreen ? 20 : 22,
-                cornerRadius: 5,
+                width: isNotchlessScreen ? 14 : 22,
+                height: isNotchlessScreen ? 14 : 22,
+                cornerRadius: isNotchlessScreen ? 7 : 5,
                 usesFlipAnimation: true
             )
             
@@ -46,12 +46,12 @@ struct NowPlayingMinimalNotchView: View {
                     nowPlayingViewModel.artworkPalette.equalizerHighlightColor,
                     nowPlayingViewModel.artworkPalette.equalizerBaseColor
                 ],
-                barHeight: isNotchlessScreen ? 16 : 18,
-                barWidth: 2.1
+                barHeight: isNotchlessScreen ? 12 : 18,
+                barWidth: isNotchlessScreen ? 1.8 : 2.1
             )
-            .frame(width: 18, height: 18)
+            .frame(width: isNotchlessScreen ? 14 : 18, height: isNotchlessScreen ? 12 : 18)
         }
-        .padding(.leading, isNotchlessScreen ? 7.scaled(by: scale) : 14.scaled(by: scale))
-        .padding(.trailing, isNotchlessScreen ? 9.scaled(by: scale) : 16.scaled(by: scale))
+        .padding(.leading, isNotchlessScreen ? 3.scaled(by: scale) : 14.scaled(by: scale))
+        .padding(.trailing, isNotchlessScreen ? 7.scaled(by: scale) : 16.scaled(by: scale))
     }
 }
