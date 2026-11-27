@@ -49,7 +49,7 @@ final class NotchGeometryCoordinator: ObservableObject {
         let isDynamicIsland = topInset == 0
         let widthOffset = CGFloat(notchWidthSetting) + 2
         let heightOffset = CGFloat(notchHeightSetting)
-        let baseHeightAdjustment: CGFloat = isDynamicIsland ? 5 : 0
+        let baseHeightAdjustment: CGFloat = isDynamicIsland ? 1 : 0
         
         let finalWidth: CGFloat
         let finalHeight: CGFloat
@@ -59,7 +59,7 @@ final class NotchGeometryCoordinator: ObservableObject {
             finalWidth = isDynamicIsland ? baseWidth * 0.85 : baseWidth
             finalHeight = notchSize.height + heightOffset + baseHeightAdjustment
         } else {
-            let baseWidthValue: CGFloat = isDynamicIsland ? 90 : 190
+            let baseWidthValue: CGFloat = isDynamicIsland ? 104 : 190
             let baseWidth = (baseWidthValue * widthScale) + widthOffset
             finalWidth = isDynamicIsland ? baseWidth * 0.85 : baseWidth
             finalHeight = 26 + heightOffset + baseHeightAdjustment
