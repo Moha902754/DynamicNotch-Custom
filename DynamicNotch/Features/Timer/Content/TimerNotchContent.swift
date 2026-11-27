@@ -21,6 +21,13 @@ struct TimerNotchContent: NotchContentProtocol, DynamicIslandCustomizable {
 
     var isExpandable: Bool { true }
 
+    var supportsDot: Bool { true }
+
+    @MainActor
+    func dotView() -> AnyView {
+        AnyView(TimerCompactIndicatorView(source: source, size: 16, lineWidth: 2.2))
+    }
+
     var windowLink: (@MainActor () -> Void)? {
         switch source {
         case .system:

@@ -65,6 +65,14 @@ protocol NotchContentProtocol: DynamicIslandCustomizable {
     /// Legacy alias for `widgetURL`.
     var windowLink: (@MainActor () -> Void)? { get }
 
+    // MARK: - Secondary Dot Presentation
+
+    /// Whether this activity can be shown as a small round dot beside the pill while another activity owns the pill.
+    var supportsDot: Bool { get }
+
+    /// View for the dot presentation. Only used when `supportsDot` is true.
+    @MainActor func dotView() -> AnyView
+
     // MARK: - Apple Dynamic Island: Compact Presentation
 
     /// View builder for the compact presentation mode (Apple Dynamic Island: `compactLeading` / `compactTrailing`).
@@ -103,6 +111,13 @@ extension NotchContentProtocol {
 
     var widgetURL: (@MainActor () -> Void)? { windowLink }
     var windowLink: (@MainActor () -> Void)? { nil }
+
+    var supportsDot: Bool { false }
+
+    @MainActor
+    func dotView() -> AnyView {
+        AnyView(EmptyView())
+    }
 
     // MARK: - View Builders
 

@@ -15,6 +15,13 @@ struct DownloadNotchContent: NotchContentProtocol, DynamicIslandCustomizable {
     
     var priority: Int { NotchContentRegistry.Media.download.priority }
     var isExpandable: Bool { true }
+
+    var supportsDot: Bool { true }
+
+    @MainActor
+    func dotView() -> AnyView {
+        AnyView(DownloadDotIndicatorView(downloadViewModel: downloadViewModel))
+    }
     
     var windowLink: (@MainActor () -> Void)? {
         return {

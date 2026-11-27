@@ -24,6 +24,9 @@ final class NotchEngine: ObservableObject {
     /// Cached border stroke color for smooth fade-out animations when content hides.
     @Published private(set) var cachedStrokeColor: Color = .clear
 
+    /// Active, non-dismissed Live Activities in priority order. Used to pick the secondary dot.
+    @Published private(set) var visibleActivities: [NotchContentProtocol] = []
+
     private let animationsProvider: () -> NotchAnimations
     private let configuredHideDelay: TimeInterval?
     private let configuredQueueDelay: TimeInterval?
@@ -133,6 +136,15 @@ final class NotchEngine: ObservableObject {
     ///
     /// Corresponds to Apple's `ActivityKit` lifecycle management (`Activity.request`, `update`, `end`, and Dynamic Island dismissal).
     func send(_ notchState: NotchState) {
+        sendInternal(notchState)
+        publishVisibleActivities()
+    }
+
+    private func publishVisibleActivities() {
+        visibleActivities = activeLiveActivities.filter { !dismissedLiveActivityIDs.contains($0.id) }
+    }
+
+    private func sendInternal(_ notchState: NotchState) {
         switch notchState {
         case .showTemporaryNotification(let content, let duration):
             if notchModel.temporaryNotificationContent?.id == content.id {
@@ -283,6 +295,7 @@ final class NotchEngine: ObservableObject {
     /// Re-evaluates priorities among registered active Live Activities and presents the highest-priority one.
     /// Maps to Apple's multi-activity scheduling in the Dynamic Island.
     func refreshLiveActivityPriorities() {
+        defer { publishVisibleActivities() }
         sortActiveLiveActivitiesByPriority()
 
         guard let bestVisible = highestPriorityVisibleActivity else {

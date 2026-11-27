@@ -21,6 +21,7 @@ final class NotchViewModel: ObservableObject, NotchCommandDispatching {
     @Published private(set) var topInset: CGFloat = 0
     @Published private(set) var collapseHeightBoost: CGFloat = 0
     @Published private(set) var collapseScale: CGFloat = 1.0
+    @Published private(set) var visibleActivities: [NotchContentProtocol] = []
 
     @Published var isLocked = false
     @Published var isHoveringScrollableContent = false
@@ -56,6 +57,14 @@ final class NotchViewModel: ObservableObject, NotchCommandDispatching {
 
     var surfaceSizeAnimation: Animation? {
         isSwipeInteractionActive ? nil : animations.updateContent
+    }
+
+    var dotContent: NotchContentProtocol? {
+        guard !isLocked,
+              !isActivityPresentationHidden,
+              let primary = displayedContent else { return nil }
+
+        return visibleActivities.first { $0.id != primary.id && $0.supportsDot }
     }
 
     var displayedContent: NotchContentProtocol? {
@@ -612,6 +621,12 @@ final class NotchViewModel: ObservableObject, NotchCommandDispatching {
                 )
                 self.notchModel = newModel
                 self.hasDisplayedContent = self.hasRealDisplayedContent
+            }
+            .store(in: &cancellables)
+
+        engine.$visibleActivities
+            .sink { [weak self] activities in
+                self?.visibleActivities = activities
             }
             .store(in: &cancellables)
 
