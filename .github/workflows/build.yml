@@ -1,0 +1,24 @@
+name: Build DynamicNotch DMG
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build-dmg:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build DMG
+        run: |
+          chmod +x build_dmg.sh
+          ./build_dmg.sh
+
+      - name: Upload DynamicNotch.dmg
+        uses: actions/upload-artifact@v4
+        with:
+          name: DynamicNotch-Vorssaint-Style
+          path: build/dmg/DynamicNotch.dmg

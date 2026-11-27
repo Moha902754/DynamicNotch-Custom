@@ -14,7 +14,7 @@ enum OverlayWindowLayout {
         screen.frame
     }
 
-    static func topAnchoredFrame(on screen: NSScreen, size: CGSize, yOffset: CGFloat = 1) -> NSRect {
+    static func topAnchoredFrame(on screen: NSScreen, size: CGSize, yOffset: CGFloat = -2) -> NSRect {
         let x = floor(screen.frame.midX - size.width / 2)
         let y = screen.frame.maxY - size.height + yOffset
 
