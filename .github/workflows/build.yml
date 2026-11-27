@@ -33,30 +33,19 @@ jobs:
             -configuration Release \
             -destination "platform=macOS" \
             -derivedDataPath build/DerivedData \
+            MACOSX_DEPLOYMENT_TARGET=14.0 \
             CODE_SIGN_IDENTITY="" \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGN_ENTITLEMENTS="" \
             DEVELOPMENT_TEAM="" \
             ENABLE_HARDENED_RUNTIME=NO \
-            build | tee build.log
+            build
 
           mkdir -p build/dmg staging
           ditto "build/DerivedData/Build/Products/Release/DynamicNotch.app" "staging/DynamicNotch.app"
           ln -s /Applications "staging/Applications"
           hdiutil create -volname "DynamicNotch" -srcfolder "staging" -ov -format UDZO "build/dmg/DynamicNotch.dmg"
-
-      - name: Extract errors on failure
-        if: failure()
-        run: |
-          grep -B 2 -A 5 "error:" build.log > build-errors.txt || tail -n 60 build.log > build-errors.txt
-
-      - name: Upload build-errors.txt
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-errors
-          path: build-errors.txt
 
       - name: Upload DynamicNotch.dmg
         uses: actions/upload-artifact@v4
