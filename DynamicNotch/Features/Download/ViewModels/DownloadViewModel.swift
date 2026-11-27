@@ -6,6 +6,8 @@ import Foundation
 final class DownloadViewModel: ObservableObject {
     @Published private(set) var activeDownloads: [DownloadModel] = []
     @Published var event: DownloadEvent?
+    @Published private(set) var isShowingCompletion = false
+    private(set) var lastCombinedProgress: Double = 0
 
     private let monitor: any DownloadMonitoring
     private var hasStartedMonitoring = false
@@ -14,6 +16,19 @@ final class DownloadViewModel: ObservableObject {
     #if DEBUG
     private var debugPreviewDownloads: [DownloadModel]?
     #endif
+
+    var combinedProgress: Double {
+        guard !activeDownloads.isEmpty else { return 0 }
+        return activeDownloads.reduce(0.0) { $0 + ($1.progress ?? 0.0) } / Double(activeDownloads.count)
+    }
+
+    func beginCompletionHold() {
+        isShowingCompletion = true
+    }
+
+    func endCompletionHold() {
+        isShowingCompletion = false
+    }
 
     var hasActiveDownloads: Bool {
         !activeDownloads.isEmpty
@@ -145,6 +160,11 @@ private extension DownloadViewModel {
     func commit(_ downloads: [DownloadModel], emitEvent: Bool = true) {
         let wasActive = !activeDownloads.isEmpty
         let isActive = !downloads.isEmpty
+
+        if !downloads.isEmpty {
+            lastCombinedProgress = downloads.reduce(0.0) { $0 + ($1.progress ?? 0.0) } / Double(downloads.count)
+            isShowingCompletion = false
+        }
 
         activeDownloads = downloads
 

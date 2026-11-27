@@ -20,7 +20,7 @@ struct DownloadNotchContent: NotchContentProtocol, DynamicIslandCustomizable {
 
     @MainActor
     func dotView() -> AnyView {
-        AnyView(DownloadDotIndicatorView(downloadViewModel: downloadViewModel))
+        AnyView(DownloadDotRingView(downloadViewModel: downloadViewModel))
     }
     
     var windowLink: (@MainActor () -> Void)? {

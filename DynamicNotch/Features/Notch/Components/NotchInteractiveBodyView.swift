@@ -110,3 +110,64 @@ struct DownloadDotIndicatorView: View {
         )
     }
 }
+
+/// Download dot: white progress ring with a down arrow, a spinner while progress is unknown,
+/// and a green ring with a checkmark when the download finishes.
+struct DownloadDotRingView: View {
+    @ObservedObject var downloadViewModel: DownloadViewModel
+
+    private let ringSize: CGFloat = 17
+    private let lineWidth: CGFloat = 2.6
+
+    private var isFinished: Bool { downloadViewModel.isShowingCompletion }
+    private var progress: Double { downloadViewModel.combinedProgress }
+    private var isIndeterminate: Bool { !isFinished && progress < 0.01 }
+
+    var body: some View {
+        ZStack {
+            Circle()
+                .stroke(Color.white.opacity(0.22), lineWidth: lineWidth)
+
+            if isIndeterminate {
+                DownloadSpinningArc(lineWidth: lineWidth)
+            } else {
+                Circle()
+                    .trim(from: 0, to: isFinished ? 1 : CGFloat(min(max(progress, 0.03), 1)))
+                    .stroke(
+                        isFinished ? Color.green : Color.white,
+                        style: StrokeStyle(lineWidth: lineWidth, lineCap: .round)
+                    )
+                    .rotationEffect(.degrees(-90))
+                    .animation(.easeInOut(duration: 0.3), value: progress)
+            }
+
+            if isFinished {
+                Image(systemName: "checkmark")
+                    .font(.system(size: 8, weight: .heavy))
+                    .foregroundStyle(Color.green)
+                    .transition(.scale(scale: 0.2).combined(with: .opacity))
+            } else {
+                Image(systemName: "arrow.down")
+                    .font(.system(size: 7.5, weight: .bold))
+                    .foregroundStyle(Color.white)
+                    .transition(.opacity)
+            }
+        }
+        .frame(width: ringSize, height: ringSize)
+        .animation(.spring(response: 0.35, dampingFraction: 0.55), value: isFinished)
+    }
+}
+
+private struct DownloadSpinningArc: View {
+    let lineWidth: CGFloat
+    @State private var spin = false
+
+    var body: some View {
+        Circle()
+            .trim(from: 0, to: 0.28)
+            .stroke(Color.white, style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
+            .rotationEffect(.degrees(spin ? 360 : 0))
+            .animation(.linear(duration: 0.9).repeatForever(autoreverses: false), value: spin)
+            .onAppear { spin = true }
+    }
+}

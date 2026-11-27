@@ -37,7 +37,25 @@ final class NotchDownloadEventsHandler {
             )
 
         case .stopped:
-            notchViewModel.send(.hideLiveActivity(id: NotchContentRegistry.Media.download.id))
+            let downloadID = NotchContentRegistry.Media.download.id
+            let wasShownAsDot = notchViewModel.dotContent?.id == downloadID
+            let looksFinished = downloadViewModel.lastCombinedProgress >= 0.5
+
+            guard wasShownAsDot, looksFinished else {
+                notchViewModel.send(.hideLiveActivity(id: downloadID))
+                return
+            }
+
+            downloadViewModel.beginCompletionHold()
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.4) { [weak self] in
+                guard let self else { return }
+                if !self.downloadViewModel.hasActiveDownloads {
+                    self.notchViewModel.send(.hideLiveActivity(id: downloadID))
+                }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) { [weak self] in
+                    self?.downloadViewModel.endCompletionHold()
+                }
+            }
         }
     }
 }
