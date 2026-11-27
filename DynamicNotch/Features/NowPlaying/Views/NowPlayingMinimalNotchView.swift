@@ -9,7 +9,7 @@ import SwiftUI
 
 struct NowPlayingMinimalNotchView: View {
     @Environment(\.notchScale) var scale
-    @Environment(\.isNotchlessScreen) var isNotchlessScreen
+    @Environment(\.isNotchless) var isNotchless
     
     @ObservedObject var nowPlayingViewModel: NowPlayingViewModel
     @ObservedObject var settings: MediaAndFilesSettingsStore
@@ -32,9 +32,9 @@ struct NowPlayingMinimalNotchView: View {
         HStack {
             ArtworkView(
                 nowPlayingViewModel: nowPlayingViewModel,
-                width: isNotchlessScreen ? 14 : 22,
-                height: isNotchlessScreen ? 14 : 22,
-                cornerRadius: isNotchlessScreen ? 7 : 5,
+                width: isNotchless ? 14 : 22,
+                height: isNotchless ? 14 : 22,
+                cornerRadius: isNotchless ? 7 : 5,
                 usesFlipAnimation: true
             )
             
@@ -46,12 +46,12 @@ struct NowPlayingMinimalNotchView: View {
                     nowPlayingViewModel.artworkPalette.equalizerHighlightColor,
                     nowPlayingViewModel.artworkPalette.equalizerBaseColor
                 ],
-                barHeight: isNotchlessScreen ? 12 : 18,
-                barWidth: isNotchlessScreen ? 1.8 : 2.1
+                barHeight: isNotchless ? 12 : 18,
+                barWidth: isNotchless ? 1.8 : 2.1
             )
-            .frame(width: isNotchlessScreen ? 15 : 18, height: isNotchlessScreen ? 12 : 18)
+            .frame(width: isNotchless ? 15 : 18, height: isNotchless ? 12 : 18)
         }
-        .padding(.leading, isNotchlessScreen ? 3.scaled(by: scale) : 14.scaled(by: scale))
-        .padding(.trailing, isNotchlessScreen ? 8.scaled(by: scale) : 16.scaled(by: scale))
+        .padding(.leading, isNotchless ? 3.scaled(by: scale) : 14.scaled(by: scale))
+        .padding(.trailing, isNotchless ? 8.scaled(by: scale) : 16.scaled(by: scale))
     }
 }
