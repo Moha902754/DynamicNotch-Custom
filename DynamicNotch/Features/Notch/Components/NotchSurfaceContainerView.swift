@@ -141,9 +141,6 @@ struct NotchSurfaceContainerView: View {
         Group {
             if notchViewModel.isDisplayingExpandedLiveActivity {
                 content.expandedView()
-            } else if notchViewModel.isDynamicIsland && content.id != NotchContentRegistry.Media.nowPlaying.id {
-                content.compactView()
-                    .scaleEffect(0.68, anchor: .center)
             } else {
                 content.compactView()
             }

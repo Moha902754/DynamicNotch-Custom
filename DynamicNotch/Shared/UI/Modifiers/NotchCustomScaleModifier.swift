@@ -24,8 +24,8 @@ struct NotchCustomScaleModifier: ViewModifier {
     
     let baseSize: CGSize
     
-    var notchPressHoldDuration: TimeInterval = 0.22
-    var pressScaleDuration: TimeInterval = 0.22
+    private var notchPressHoldDuration: TimeInterval = 0.22
+    private var pressScaleDuration: TimeInterval = 0.22
     
     private var scaleFactor: CGFloat {
         notchViewModel.isDynamicIsland ? 1.14 : 1.08
