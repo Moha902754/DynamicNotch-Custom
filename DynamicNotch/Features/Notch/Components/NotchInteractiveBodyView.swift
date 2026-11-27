@@ -28,7 +28,7 @@ struct NotchInteractiveBodyView: View {
             notchViewModel: notchViewModel,
             isEnabled: shouldEnableNotchSwipeGestures
         )
-        .offset(y: notchViewModel.isDynamicIsland ? 4 : 1)
+        .offset(y: notchViewModel.isDynamicIsland ? 6.5 : 1)
         .contextMenu {
             NotchContextMenu(settingsViewModel: settingsViewModel)
         }
