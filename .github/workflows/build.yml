@@ -21,6 +21,7 @@ jobs:
 
       - name: Build DMG
         run: |
+          set -o pipefail
           xcodebuild \
             -resolvePackageDependencies \
             -project DynamicNotch.xcodeproj \
@@ -32,12 +33,13 @@ jobs:
             -configuration Release \
             -destination "platform=macOS" \
             -derivedDataPath build/DerivedData \
-            CODE_SIGN_IDENTITY="-" \
+            CODE_SIGN_IDENTITY="" \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGNING_ALLOWED=NO \
-            AD_HOC_CODE_SIGNING_ALLOWED=YES \
+            CODE_SIGN_ENTITLEMENTS="" \
             DEVELOPMENT_TEAM="" \
-            build
+            ENABLE_HARDENED_RUNTIME=NO \
+            build | tee build.log
 
           mkdir -p build/dmg staging
           ditto "build/DerivedData/Build/Products/Release/DynamicNotch.app" "staging/DynamicNotch.app"
