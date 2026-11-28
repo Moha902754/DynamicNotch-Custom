@@ -1,3 +1,4 @@
+internal import EventKit
 import SwiftUI
 internal import AppKit
 
