@@ -51,8 +51,19 @@ private struct DownloadExpandedNotchContentView: View {
         .padding(.horizontal, isNotchlessScreen ? 20 : 40)
         .contentShape(Rectangle())
         .onTapGesture {
+            // Capture the download content before hiding it
+            let downloadContent = notchViewModel.visibleActivities.first(where: { $0.id == NotchContentRegistry.Media.download.id })
+            
+            // Clear preferred activity and hide the download (music comes back)
             notchViewModel.setPreferredLiveActivity(id: nil)
             notchViewModel.send(.hideLiveActivity(id: NotchContentRegistry.Media.download.id))
+            
+            // Re-add the download after the transition, so it appears as a dot
+            if let downloadContent {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                    notchViewModel.send(.showLiveActivity(downloadContent))
+                }
+            }
         }
     }
     
