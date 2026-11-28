@@ -128,6 +128,7 @@ struct DownloadDotIndicatorView: View {
 
 struct DownloadDotRingView: View {
     @ObservedObject var downloadViewModel: DownloadViewModel
+    var notchViewModel: NotchViewModel? = nil
     @State private var showThumbnail = false
     @State private var isHovered = false
     @State private var pulseScale: CGFloat = 1.0
@@ -165,7 +166,7 @@ struct DownloadDotRingView: View {
                         .clipShape(RoundedRectangle(cornerRadius: 4, style: .continuous))
                         .transition(.scale(scale: 0.3).combined(with: .opacity))
                 } else if isHovered {
-                    HStack(spacing: 3) {
+                    HStack(spacing: 2) {
                         Image(systemName: "arrow.down")
                             .font(.system(size: 7, weight: .bold))
                             .foregroundStyle(.white)
@@ -173,11 +174,12 @@ struct DownloadDotRingView: View {
                             .font(.system(size: 9, weight: .bold, design: .rounded))
                             .foregroundStyle(.white)
                     }
-                    .padding(.horizontal, 6)
+                    .padding(.horizontal, 8)
                     .padding(.vertical, 4)
                     .background(Capsule().fill(Color.black.opacity(0.85)))
                     .overlay(Capsule().stroke(ringColor.opacity(0.6), lineWidth: 1))
-                    .frame(width: 44, height: 20)
+                    // Increased width to 54 to fit "100%"
+                    .frame(width: 54, height: 22)
                     .offset(x: 6)
                 } else {
                     ringContent
@@ -187,13 +189,15 @@ struct DownloadDotRingView: View {
                     Text("\(downloadViewModel.activeDownloads.count)")
                         .font(.system(size: 7.5, weight: .heavy, design: .rounded))
                         .foregroundStyle(.black)
-                        .padding(.horizontal, 3)
+                        .padding(.horizontal, 4)
+                        .padding(.vertical, 1)
                         .background(Capsule().fill(Color.white))
-                        .offset(x: 6.5, y: 6.5)
+                        .offset(x: 8, y: 8)
                         .transition(.scale.combined(with: .opacity))
                 }
             }
-            .frame(width: isHovered ? 60 : ringSize + 4, height: ringSize + 4)
+            // Increased padding to accommodate the offset badge and hover state
+            .frame(width: isHovered ? 64 : ringSize + 12, height: isHovered ? 24 : ringSize + 12)
             .scaleEffect(pulseScale)
         }
         .onHover { hovering in
@@ -205,6 +209,10 @@ struct DownloadDotRingView: View {
             if downloadViewModel.isPersistent {
                 withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
                     downloadViewModel.dismissPersistentDot()
+                }
+                // Force the UI to hide the dot completely so it doesn't spin
+                if let notchVM = notchViewModel {
+                    notchVM.send(.hideLiveActivity(id: NotchContentRegistry.Media.download.id))
                 }
             }
         }
