@@ -91,6 +91,18 @@ struct NotchDotView: View {
             .clipShape(Circle())
             .contentShape(Circle())
             .onTapGesture {
+                // If this is the download dot in persistent state, click dismisses it
+                if content.id == NotchContentRegistry.Media.download.id {
+                    if let downloadContent = content as? DownloadNotchContent,
+                       downloadContent.downloadViewModel.isPersistent {
+                        withAnimation(.spring(response: 0.38, dampingFraction: 0.78)) {
+                            downloadContent.downloadViewModel.dismissPersistentDot()
+                            notchViewModel.send(.hideLiveActivity(id: content.id))
+                        }
+                        return
+                    }
+                }
+
                 if let link = content.windowLink {
                     link()
                 } else {
@@ -117,6 +129,8 @@ struct DownloadDotIndicatorView: View {
 struct DownloadDotRingView: View {
     @ObservedObject var downloadViewModel: DownloadViewModel
     @State private var showThumbnail = false
+    @State private var isHovered = false
+    @State private var pulseScale: CGFloat = 1.0
 
     private let ringSize: CGFloat = 17
     private let lineWidth: CGFloat = 2.6
@@ -135,7 +149,12 @@ struct DownloadDotRingView: View {
         if isFailed { return .red }
         if isFinished { return .green }
         if isStalled { return .orange }
-        return .white
+        return Color.accentColor
+    }
+
+    private var displayPercent: String {
+        if isFinished { return "100" }
+        return "\(Int(progress * 100))"
     }
 
     var body: some View {
@@ -145,6 +164,21 @@ struct DownloadDotRingView: View {
                     DownloadFileThumbnailView(url: url, size: 16)
                         .clipShape(RoundedRectangle(cornerRadius: 4, style: .continuous))
                         .transition(.scale(scale: 0.3).combined(with: .opacity))
+                } else if isHovered {
+                    HStack(spacing: 3) {
+                        Image(systemName: "arrow.down")
+                            .font(.system(size: 7, weight: .bold))
+                            .foregroundStyle(.white)
+                        Text("\(displayPercent)%")
+                            .font(.system(size: 9, weight: .bold, design: .rounded))
+                            .foregroundStyle(.white)
+                    }
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 4)
+                    .background(Capsule().fill(Color.black.opacity(0.85)))
+                    .overlay(Capsule().stroke(ringColor.opacity(0.6), lineWidth: 1))
+                    .frame(width: 44, height: 20)
+                    .offset(x: 6)
                 } else {
                     ringContent
                 }
@@ -159,7 +193,20 @@ struct DownloadDotRingView: View {
                         .transition(.scale.combined(with: .opacity))
                 }
             }
-            .frame(width: ringSize + 4, height: ringSize + 4)
+            .frame(width: isHovered ? 60 : ringSize + 4, height: ringSize + 4)
+            .scaleEffect(pulseScale)
+        }
+        .onHover { hovering in
+            withAnimation(.spring(response: 0.35, dampingFraction: 0.65)) {
+                isHovered = hovering
+            }
+        }
+        .onTapGesture {
+            if downloadViewModel.isPersistent {
+                withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                    downloadViewModel.dismissPersistentDot()
+                }
+            }
         }
         .onChange(of: isFinished) { _, finished in
             if finished {
@@ -175,6 +222,18 @@ struct DownloadDotRingView: View {
         }
         .animation(.spring(response: 0.35, dampingFraction: 0.6), value: isFinished)
         .animation(.spring(response: 0.35, dampingFraction: 0.6), value: isFailed)
+        .animation(.spring(response: 0.35, dampingFraction: 0.65), value: isHovered)
+        .onChange(of: isStalled) { _, stalled in
+            if stalled {
+                withAnimation(.easeInOut(duration: 0.8).repeatForever(autoreverses: true)) {
+                    pulseScale = 1.15
+                }
+            } else {
+                withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                    pulseScale = 1.0
+                }
+            }
+        }
     }
 
     @ViewBuilder

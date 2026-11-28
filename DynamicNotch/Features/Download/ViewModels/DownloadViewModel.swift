@@ -7,6 +7,7 @@ final class DownloadViewModel: ObservableObject {
     @Published private(set) var activeDownloads: [DownloadModel] = []
     @Published var event: DownloadEvent?
     @Published private(set) var isShowingCompletion = false
+    @Published var isPersistent = false
     @Published private(set) var lastCompletedURL: URL?
     @Published private(set) var didFailRecently = false
     private(set) var lastCombinedProgress: Double = 0
@@ -30,6 +31,14 @@ final class DownloadViewModel: ObservableObject {
     }
 
     func endCompletionHold() {
+        isShowingCompletion = false
+        didFailRecently = false
+        lastCompletedURL = nil
+        isPersistent = false
+    }
+
+    func dismissPersistentDot() {
+        isPersistent = false
         isShowingCompletion = false
         didFailRecently = false
         lastCompletedURL = nil

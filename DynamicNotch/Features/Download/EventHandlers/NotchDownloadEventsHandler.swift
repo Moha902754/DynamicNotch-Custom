@@ -46,14 +46,24 @@ final class NotchDownloadEventsHandler {
                 return
             }
 
-            downloadViewModel.beginCompletionHold(failed: !looksFinished)
-            DispatchQueue.main.asyncAfter(deadline: .now() + (looksFinished ? 2.4 : 1.8)) { [weak self] in
-                guard let self else { return }
-                if !self.downloadViewModel.hasActiveDownloads {
-                    self.notchViewModel.send(.hideLiveActivity(id: downloadID))
+            if looksFinished {
+                // SUCCESS: show green checkmark, then make it persistent until clicked
+                downloadViewModel.beginCompletionHold(failed: false)
+                DispatchQueue.main.asyncAfter(deadline: .now() + 2.4) { [weak self] in
+                    guard let self else { return }
+                    if !self.downloadViewModel.hasActiveDownloads {
+                        self.downloadViewModel.isPersistent = true
+                    }
                 }
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) { [weak self] in
-                    self?.downloadViewModel.endCompletionHold()
+            } else {
+                // CANCELLED (< 50%): flash red briefly, then vanish silently
+                downloadViewModel.beginCompletionHold(failed: true)
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) { [weak self] in
+                    guard let self else { return }
+                    self.downloadViewModel.endCompletionHold()
+                    if !self.downloadViewModel.hasActiveDownloads {
+                        self.notchViewModel.send(.hideLiveActivity(id: downloadID))
+                    }
                 }
             }
         }
