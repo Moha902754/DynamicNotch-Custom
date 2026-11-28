@@ -223,6 +223,13 @@ struct DownloadDotRingView: View {
         .animation(.spring(response: 0.35, dampingFraction: 0.6), value: isFinished)
         .animation(.spring(response: 0.35, dampingFraction: 0.6), value: isFailed)
         .animation(.spring(response: 0.35, dampingFraction: 0.65), value: isHovered)
+        .onAppear {
+            if isStalled {
+                withAnimation(.easeInOut(duration: 0.8).repeatForever(autoreverses: true)) {
+                    pulseScale = 1.15
+                }
+            }
+        }
         .onChange(of: isStalled) { _, stalled in
             if stalled {
                 withAnimation(.easeInOut(duration: 0.8).repeatForever(autoreverses: true)) {

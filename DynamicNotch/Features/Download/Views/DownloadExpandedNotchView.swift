@@ -52,7 +52,7 @@ private struct DownloadExpandedNotchContentView: View {
         .contentShape(Rectangle())
         .onTapGesture {
             notchViewModel.setPreferredLiveActivity(id: nil)
-            notchViewModel.handleOutsideClick()
+            notchViewModel.send(.hideLiveActivity(id: NotchContentRegistry.Media.download.id))
         }
     }
     
