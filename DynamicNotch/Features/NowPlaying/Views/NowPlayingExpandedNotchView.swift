@@ -35,9 +35,9 @@ struct NowPlayingExpandedNotchView: View {
         let displayedProgress = min(max(scrubProgress ?? progress, 0), 1)
         let displayedElapsedTime = snapshot.duration > 0 ? TimeInterval(displayedProgress) * snapshot.duration : elapsedTime
         let appearance = settings.nowPlayingAppearanceOptions
-        let artSize: CGFloat = isNotchlessScreen ? 80 : 84
+        let artSize: CGFloat = isNotchlessScreen ? 60 : 65
 
-        return HStack(alignment: .center, spacing: 14) {
+        return HStack(alignment: .center, spacing: 10) {
             Button(action: { openPlaybackSource() }) {
                 ZStack(alignment: .bottomTrailing) {
                     ArtworkView(nowPlayingViewModel: nowPlayingViewModel, width: artSize, height: artSize, cornerRadius: 8, usesFlipAnimation: true)
@@ -53,7 +53,7 @@ struct NowPlayingExpandedNotchView: View {
                 }.contentShape(Rectangle())
             }.buttonStyle(PlaybackSourceButtonStyle()).disabled(!nowPlayingViewModel.canOpenPlaybackSource)
 
-            VStack(alignment: .leading, spacing: 7) {
+            VStack(alignment: .leading, spacing: 5) {
                 HStack(alignment: .top, spacing: 8) {
                     Button(action: { openPlaybackSource() }) {
                         VStack(alignment: .leading, spacing: 2) {
@@ -75,7 +75,7 @@ struct NowPlayingExpandedNotchView: View {
                 HStack(spacing: 0) {
                     if appearance.showsFavoriteButton { FavoriteTrackButton(nowPlayingViewModel: nowPlayingViewModel, width: 28, height: 28, fontSize: 14) }
                     Spacer(minLength: 6)
-                    HStack(spacing: 20) {
+                    HStack(spacing: 16) {
                         PlayerControlButton(systemImage: "backward.fill", fontSize: 16, width: 30, height: 30, feedbackStyle: .backward) { nowPlayingViewModel.previousTrack() }
                         PlayerControlButton(systemImage: snapshot.isPlaying ? "pause.fill" : "play.fill", fontSize: 21, width: 32, height: 32, feedbackStyle: .playPause) { nowPlayingViewModel.togglePlayPause() }
                         PlayerControlButton(systemImage: "forward.fill", fontSize: 16, width: 30, height: 30, feedbackStyle: .forward) { nowPlayingViewModel.nextTrack() }
@@ -85,8 +85,8 @@ struct NowPlayingExpandedNotchView: View {
                 }.padding(.top, 1)
             }.frame(maxWidth: .infinity)
         }
-        .padding(.top, isNotchlessScreen ? 14 : 26).padding(.bottom, 14)
-        .padding(.leading, isNotchlessScreen ? 16 : 36).padding(.trailing, isNotchlessScreen ? 18 : 38)
+        .padding(.top, isNotchlessScreen ? 10 : 22).padding(.bottom, 10)
+        .padding(.leading, isNotchlessScreen ? 12 : 24).padding(.trailing, isNotchlessScreen ? 12 : 24)
     }
 
     private func openPlaybackSource() {
