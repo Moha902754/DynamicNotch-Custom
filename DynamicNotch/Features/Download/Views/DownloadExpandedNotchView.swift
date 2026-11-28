@@ -28,6 +28,7 @@ private struct DownloadExpandedNotchContentView: View {
     @Environment(\.isNotchlessScreen) private var isNotchlessScreen
     
     let download: DownloadModel
+    let notchViewModel: NotchViewModel
     
     private static let byteCountFormatter: ByteCountFormatter = {
         let formatter = ByteCountFormatter()
