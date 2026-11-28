@@ -80,19 +80,19 @@ struct NowPlayingExpandedNotchView: View {
             controlsSection(snapshot: snapshot, appearance: appearance)
         }
         .padding(.top, isNotchlessScreen ? 0 : 15)
-        .padding(.horizontal, isNotchlessScreen ? 25 : 55)
+        .padding(.horizontal, isNotchlessScreen ? 20 : 32)
     }
 
     @ViewBuilder
     private func headerSection(snapshot: NowPlayingSnapshot, appearance: NowPlayingAppearanceOptions) -> some View {
-        HStack(spacing: 15) {
+        HStack(spacing: 10) {
             Button(action: {
                 openPlaybackSource()
             }) {
                 ArtworkView(
                     nowPlayingViewModel: nowPlayingViewModel,
-                    width: 55,
-                    height: 55,
+                    width: 44,
+                    height: 44,
                     cornerRadius: 10,
                     usesFlipAnimation: true
                 )
@@ -139,10 +139,10 @@ struct NowPlayingExpandedNotchView: View {
                         nowPlayingViewModel.artworkPalette.equalizerHighlightColor,
                         nowPlayingViewModel.artworkPalette.equalizerBaseColor
                     ],
-                    barHeight: 23,
-                    barWidth: 2.7
+                    barHeight: 18,
+                    barWidth: 2.2
                 )
-                .frame(width: 23, height: 18)
+                .frame(width: 18, height: 14)
             }
         }
     }
@@ -150,12 +150,12 @@ struct NowPlayingExpandedNotchView: View {
     @ViewBuilder
     private func controlsSection(snapshot: NowPlayingSnapshot, appearance: NowPlayingAppearanceOptions) -> some View {
         ZStack {
-            HStack(spacing: 25) {
+            HStack(spacing: 18) {
                 PlayerControlButton(
                     systemImage: "backward.fill",
-                    fontSize: 22,
-                    width: 42,
-                    height: 42,
+                    fontSize: 15,
+                    width: 28,
+                    height: 28,
                     feedbackStyle: .backward
                 ) {
                     nowPlayingViewModel.previousTrack()
@@ -163,9 +163,9 @@ struct NowPlayingExpandedNotchView: View {
 
                 PlayerControlButton(
                     systemImage: snapshot.isPlaying ? "pause.fill" : "play.fill",
-                    fontSize: 32,
-                    width: 42,
-                    height: 42,
+                    fontSize: 22,
+                    width: 32,
+                    height: 32,
                     feedbackStyle: .playPause
                 ) {
                     nowPlayingViewModel.togglePlayPause()
@@ -173,9 +173,9 @@ struct NowPlayingExpandedNotchView: View {
 
                 PlayerControlButton(
                     systemImage: "forward.fill",
-                    fontSize: 22,
-                    width: 42,
-                    height: 42,
+                    fontSize: 15,
+                    width: 28,
+                    height: 28,
                     feedbackStyle: .forward
                 ) {
                     nowPlayingViewModel.nextTrack()
