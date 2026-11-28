@@ -75,7 +75,8 @@ final class NotchTimerEventsHandler {
                 .showLiveActivity(
                     TimerNotchContent(
                         source: .system(timerViewModel),
-                        settingsViewModel: settingsViewModel
+                        settingsViewModel: settingsViewModel,
+                        notchViewModel: notchViewModel
                     )
                 )
             )

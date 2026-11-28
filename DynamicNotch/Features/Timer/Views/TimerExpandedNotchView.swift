@@ -2,23 +2,26 @@ import SwiftUI
 
 struct TimerExpandedNotchView: View {
     let source: TimerSource
+    let notchViewModel: NotchViewModel?
     
-    init(source: TimerSource) {
+    init(source: TimerSource, notchViewModel: NotchViewModel? = nil) {
         self.source = source
+        self.notchViewModel = notchViewModel
     }
     
-    init(timerViewModel: TimerViewModel) {
+    init(timerViewModel: TimerViewModel, notchViewModel: NotchViewModel? = nil) {
         self.source = .system(timerViewModel)
+        self.notchViewModel = notchViewModel
     }
     
     var body: some View {
         Group {
             switch source {
             case .system(let vm):
-                TimerExpandedNotchViewInternal(source: source, viewModel: vm)
+                TimerExpandedNotchViewInternal(source: source, viewModel: vm, notchViewModel: notchViewModel)
                 
             case .local(let vm):
-                TimerExpandedNotchViewInternal(source: source, viewModel: vm)
+                TimerExpandedNotchViewInternal(source: source, viewModel: vm, notchViewModel: notchViewModel)
             }
         }
     }
@@ -26,11 +29,19 @@ struct TimerExpandedNotchView: View {
 
 private struct TimerExpandedNotchViewInternal<VM: ObservableObject>: View {
     let source: TimerSource
+    let notchViewModel: NotchViewModel?
     
     @Environment(\.isNotchlessScreen) var isNotchlessScreen
     @Environment(\.locale) private var locale
     @ObservedObject var viewModel: VM
     @State private var isControlActionRunning = false
+    
+    private var timerID: String {
+        switch source {
+        case .system: return NotchContentRegistry.Media.timer.id
+        case .local: return NotchContentRegistry.Media.localTimer.id
+        }
+    }
     
     private var pauseButtonSymbol: String {
         source.isPaused ? "play.fill" : "pause.fill"
@@ -47,6 +58,18 @@ private struct TimerExpandedNotchViewInternal<VM: ObservableObject>: View {
         .padding(.top, isNotchlessScreen ? 0 : 28)
         .padding(.leading, isNotchlessScreen ? 15 : 32)
         .padding(.trailing, isNotchlessScreen ? 18 : 38)
+        .contentShape(Rectangle())
+        .onTapGesture {
+            guard let vm = notchViewModel else { return }
+            let content = vm.visibleActivities.first(where: { $0.id == timerID })
+            vm.setPreferredLiveActivity(id: nil)
+            if let content {
+                vm.send(.hideLiveActivity(id: timerID))
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                    vm.send(.showLiveActivity(content))
+                }
+            }
+        }
     }
     
     private var leftContent: some View {

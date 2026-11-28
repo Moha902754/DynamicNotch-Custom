@@ -5,6 +5,7 @@ struct TimerNotchContent: NotchContentProtocol, DynamicIslandCustomizable {
     let id: String
     let source: TimerSource
     let settingsViewModel: SettingsViewModel?
+    let notchViewModel: NotchViewModel?
 
     var priority: Int {
         switch source {
@@ -47,9 +48,10 @@ struct TimerNotchContent: NotchContentProtocol, DynamicIslandCustomizable {
         ApplicationActivator.shared.openOrActivate(bundleIdentifier: "com.apple.clock")
     }
 
-    init(source: TimerSource, settingsViewModel: SettingsViewModel? = nil) {
+    init(source: TimerSource, settingsViewModel: SettingsViewModel? = nil, notchViewModel: NotchViewModel? = nil) {
         self.source = source
         self.settingsViewModel = settingsViewModel
+        self.notchViewModel = notchViewModel
         switch source {
         case .system:
             self.id = NotchContentRegistry.Media.timer.id
@@ -58,9 +60,10 @@ struct TimerNotchContent: NotchContentProtocol, DynamicIslandCustomizable {
         }
     }
 
-    init(timerViewModel: TimerViewModel, settingsViewModel: SettingsViewModel) {
+    init(timerViewModel: TimerViewModel, settingsViewModel: SettingsViewModel, notchViewModel: NotchViewModel? = nil) {
         self.source = .system(timerViewModel)
         self.settingsViewModel = settingsViewModel
+        self.notchViewModel = notchViewModel
         self.id = NotchContentRegistry.Media.timer.id
     }
 
@@ -95,7 +98,7 @@ struct TimerNotchContent: NotchContentProtocol, DynamicIslandCustomizable {
 
     @MainActor
     func expandedView() -> AnyView {
-        AnyView(TimerExpandedNotchView(source: source))
+        AnyView(TimerExpandedNotchView(source: source, notchViewModel: notchViewModel))
     }
 }
 

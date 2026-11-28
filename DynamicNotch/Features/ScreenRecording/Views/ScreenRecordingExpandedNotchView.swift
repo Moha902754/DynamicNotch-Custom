@@ -2,6 +2,7 @@ import SwiftUI
 
 struct ScreenRecordingExpandedNotchView: View {
     @ObservedObject var viewModel: ScreenRecordingViewModel
+    let notchViewModel: NotchViewModel?
     @Environment(\.isNotchlessScreen) private var isNotchlessScreen
     @Environment(\.locale) private var locale
     @State private var isBlinking = false
@@ -17,6 +18,19 @@ struct ScreenRecordingExpandedNotchView: View {
         .padding(.top, isNotchlessScreen ? 0 : 20)
         .padding(.leading, isNotchlessScreen ? 25 : 45)
         .padding(.trailing, isNotchlessScreen ? 15 : 38)
+        .contentShape(Rectangle())
+        .onTapGesture {
+            guard let vm = notchViewModel else { return }
+            let id = NotchContentRegistry.ScreenRecording.active.id
+            let content = vm.visibleActivities.first(where: { $0.id == id })
+            vm.setPreferredLiveActivity(id: nil)
+            if let content {
+                vm.send(.hideLiveActivity(id: id))
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                    vm.send(.showLiveActivity(content))
+                }
+            }
+        }
         .onAppear {
             withAnimation(.easeInOut(duration: 1).repeatForever(autoreverses: true)) {
                 isBlinking = true

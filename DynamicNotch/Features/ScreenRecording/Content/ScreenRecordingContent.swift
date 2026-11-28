@@ -9,25 +9,30 @@ struct ScreenRecordingContent: NotchContentProtocol, DynamicIslandCustomizable {
     let id = NotchContentRegistry.ScreenRecording.active.id
     let screenRecordingViewModel: ScreenRecordingViewModel
     let style: ScreenRecordingStyle
+    let notchViewModel: NotchViewModel?
 
     init(
         screenRecordingViewModel: ScreenRecordingViewModel,
-        style: ScreenRecordingStyle = .detailed
+        style: ScreenRecordingStyle = .detailed,
+        notchViewModel: NotchViewModel? = nil
     ) {
         self.screenRecordingViewModel = screenRecordingViewModel
         self.style = style
+        self.notchViewModel = notchViewModel
     }
 
     @MainActor
     init(settingsViewModel: SettingsViewModel) {
         self.screenRecordingViewModel = ScreenRecordingViewModel(monitor: InactiveScreenRecordingMonitor())
         self.style = settingsViewModel.screenRecording.screenRecordingStyle
+        self.notchViewModel = nil
     }
 
     @MainActor
-    init(screenRecordingViewModel: ScreenRecordingViewModel, settingsViewModel: SettingsViewModel) {
+    init(screenRecordingViewModel: ScreenRecordingViewModel, settingsViewModel: SettingsViewModel, notchViewModel: NotchViewModel? = nil) {
         self.screenRecordingViewModel = screenRecordingViewModel
         self.style = settingsViewModel.screenRecording.screenRecordingStyle
+        self.notchViewModel = notchViewModel
     }
 
     var priority: Int { NotchContentRegistry.ScreenRecording.active.priority }
@@ -77,6 +82,6 @@ struct ScreenRecordingContent: NotchContentProtocol, DynamicIslandCustomizable {
 
     @MainActor
     func expandedView() -> AnyView {
-        AnyView(ScreenRecordingExpandedNotchView(viewModel: screenRecordingViewModel))
+        AnyView(ScreenRecordingExpandedNotchView(viewModel: screenRecordingViewModel, notchViewModel: notchViewModel))
     }
 }

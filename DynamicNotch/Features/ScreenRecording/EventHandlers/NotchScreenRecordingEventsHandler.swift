@@ -36,7 +36,8 @@ final class NotchScreenRecordingEventsHandler {
                 .showLiveActivity(
                     ScreenRecordingContent(
                         screenRecordingViewModel: screenRecordingViewModel,
-                        settingsViewModel: settingsViewModel
+                        settingsViewModel: settingsViewModel,
+                        notchViewModel: notchViewModel
                     )
                 )
             )
