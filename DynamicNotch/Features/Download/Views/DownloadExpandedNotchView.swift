@@ -47,6 +47,11 @@ private struct DownloadExpandedNotchContentView: View {
         }
         .padding(.top, isNotchlessScreen ? 0 : 25)
         .padding(.horizontal, isNotchlessScreen ? 20 : 40)
+        .contentShape(Rectangle())
+        .onTapGesture {
+            notchViewModel.setPreferredLiveActivity(id: nil)
+            notchViewModel.handleOutsideClick()
+        }
     }
     
     private var description: some View {
