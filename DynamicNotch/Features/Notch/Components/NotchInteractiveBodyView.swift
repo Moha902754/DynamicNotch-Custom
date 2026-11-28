@@ -190,19 +190,9 @@ struct DownloadDotRingView: View {
                     ringContent
                 }
 
-                if downloadViewModel.activeDownloads.count > 1 && !downloadViewModel.isShowingCompletion {
-                    Text("\(downloadViewModel.activeDownloads.count)")
-                        .font(.system(size: 7.5, weight: .heavy, design: .rounded))
-                        .foregroundStyle(.black)
-                        .padding(.horizontal, 4)
-                        .padding(.vertical, 1)
-                        .background(Capsule().fill(Color.white))
-                        .offset(x: 8, y: 8)
-                        .transition(.scale.combined(with: .opacity))
-                }
+                // (Badge removed for cleaner UI)
             }
-            // Increased padding to accommodate the offset badge and hover state
-            .frame(width: isHovered ? 64 : ringSize + 12, height: isHovered ? 24 : ringSize + 12)
+            .frame(width: isHovered ? 64 : ringSize + 4, height: isHovered ? 24 : ringSize + 4)
             .scaleEffect(pulseScale)
         }
         .onHover { hovering in

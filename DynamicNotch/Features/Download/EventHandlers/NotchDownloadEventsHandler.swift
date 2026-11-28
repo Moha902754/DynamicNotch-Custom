@@ -47,12 +47,13 @@ final class NotchDownloadEventsHandler {
             }
 
             if looksFinished {
-                // SUCCESS: show green checkmark, then make it persistent until clicked
+                // SUCCESS: show green checkmark for 2.5s then auto-hide
                 downloadViewModel.beginCompletionHold(failed: false)
-                DispatchQueue.main.asyncAfter(deadline: .now() + 2.4) { [weak self] in
+                DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) { [weak self] in
                     guard let self else { return }
                     if !self.downloadViewModel.hasActiveDownloads {
-                        self.downloadViewModel.isPersistent = true
+                        self.downloadViewModel.endCompletionHold()
+                        self.notchViewModel.send(.hideLiveActivity(id: downloadID))
                     }
                 }
             } else {
