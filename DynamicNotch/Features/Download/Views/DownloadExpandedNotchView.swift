@@ -17,7 +17,7 @@ struct DownloadExpandedNotchView: View {
     var body: some View {
         TimelineView(.periodic(from: .now, by: 1)) { _ in
             if let primaryDownload {
-                DownloadExpandedNotchContentView(download: primaryDownload)
+                DownloadExpandedNotchContentView(download: primaryDownload, notchViewModel: notchViewModel)
             }
         }
     }
