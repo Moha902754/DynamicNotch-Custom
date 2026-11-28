@@ -96,13 +96,14 @@ struct NotchDotView: View {
                 }
             }
             .onLongPressGesture(minimumDuration: 0.35) {
-                // Force the engine to swap to the Download content
+                // Force the engine to swap to whatever content this dot represents
                 if let downloadContent = content as? DownloadNotchContent {
                     notchViewModel.send(.showLiveActivity(downloadContent))
-                    notchViewModel.setPreferredLiveActivity(id: content.id)
                 } else {
-                    notchViewModel.setPreferredLiveActivity(id: content.id)
+                    // For Timer, Screen Recording, etc. — send a showLiveActivity event
+                    notchViewModel.send(.showLiveActivity(content))
                 }
+                notchViewModel.setPreferredLiveActivity(id: content.id)
                 // Expand after a tiny delay so the swap processes
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                     withAnimation(.spring(response: 0.45, dampingFraction: 0.75)) {
