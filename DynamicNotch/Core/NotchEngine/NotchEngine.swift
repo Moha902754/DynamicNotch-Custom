@@ -611,7 +611,8 @@ final class NotchEngine: ObservableObject {
                 return lhs.id < rhs.id
             }
 
-            return lhs.priority > rhs.priority
+            // Lower number = higher priority (matches the Settings UI)
+            return lhs.priority < rhs.priority
         }
     }
 

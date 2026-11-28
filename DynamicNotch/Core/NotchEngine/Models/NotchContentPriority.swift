@@ -132,7 +132,7 @@ enum NotchContentPriority {
         .screenRecording,
     ]
 
-    static let `default` = 0
+    static let `default` = 100
     static let focus = 1
     static let hotspot = 2
     static let vpn = 3
