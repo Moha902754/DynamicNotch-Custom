@@ -18,10 +18,10 @@ struct TimerExpandedNotchView: View {
         Group {
             switch source {
             case .system(let vm):
-                TimerExpandedNotchViewInternal(source: source, viewModel: vm, notchViewModel: notchViewModel)
+                TimerExpandedNotchViewInternal(source: source, notchViewModel: notchViewModel, viewModel: vm)
                 
             case .local(let vm):
-                TimerExpandedNotchViewInternal(source: source, viewModel: vm, notchViewModel: notchViewModel)
+                TimerExpandedNotchViewInternal(source: source, notchViewModel: notchViewModel, viewModel: vm)
             }
         }
     }
