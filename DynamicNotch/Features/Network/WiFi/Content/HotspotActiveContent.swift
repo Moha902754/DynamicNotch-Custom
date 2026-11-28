@@ -15,6 +15,8 @@ struct HotspotActiveContent: NotchContentProtocol, DynamicIslandCustomizable {
     var appearanceStyle: HotspotAppearanceStyle { settingsViewModel.connectivity.hotspotAppearanceStyle}
     var priority: Int { NotchContentRegistry.Wifi.hotspot.priority }
     var strokeColor: Color {.green.opacity(0.3)}
+    var supportsDot: Bool { true }
+    @MainActor func dotView() -> AnyView { AnyView(Image(systemName: "personalhotspot").font(.system(size: 11, weight: .bold)).foregroundStyle(.green)) }
     
     func compactSize(baseWidth: CGFloat, baseHeight: CGFloat) -> CGSize {
         let extraWidth: CGFloat = appearanceStyle == .battery ? 100 : 80

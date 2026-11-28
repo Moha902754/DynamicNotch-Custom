@@ -87,7 +87,7 @@ final class NotchLocalTimerEventsHandler {
                     localTimerViewModel: localTimerViewModel,
                     onStart: { [weak self] in
                         guard let self else { return }
-                        self.notchViewModel.setPreferredLiveActivity(id: NotchContentRegistry.Media.localTimer.id)
+                        if self.notchViewModel.displayedContent?.id != NotchContentRegistry.Media.nowPlaying.id { self.notchViewModel.setPreferredLiveActivity(id: NotchContentRegistry.Media.localTimer.id) }
                     },
                     onClose: { [weak self] in
                         guard let self else { return }

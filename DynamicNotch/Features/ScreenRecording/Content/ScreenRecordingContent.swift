@@ -33,6 +33,8 @@ struct ScreenRecordingContent: NotchContentProtocol, DynamicIslandCustomizable {
     var priority: Int { NotchContentRegistry.ScreenRecording.active.priority }
     var isExpandable: Bool { true }
     var strokeColor: Color { .red.opacity(0.3) }
+    var supportsDot: Bool { true }
+    @MainActor func dotView() -> AnyView { AnyView(ScreenRecordingDotView(viewModel: screenRecordingViewModel)) }
 
     func compactSize(baseWidth: CGFloat, baseHeight: CGFloat) -> CGSize {
         switch style {

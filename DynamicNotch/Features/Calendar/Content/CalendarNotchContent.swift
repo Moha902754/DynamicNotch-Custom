@@ -7,6 +7,8 @@ struct CalendarNotchContent: NotchContentProtocol, DynamicIslandCustomizable {
     
     var priority: Int { NotchContentRegistry.Calendar.upcoming.priority }
     var isExpandable: Bool { true }
+    var supportsDot: Bool { true }
+    @MainActor func dotView() -> AnyView { AnyView(CalendarDotView(calendarViewModel: calendarViewModel)) }
     
     var windowLink: (@MainActor () -> Void)? {
         return {

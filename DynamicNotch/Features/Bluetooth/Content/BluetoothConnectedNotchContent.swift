@@ -11,6 +11,8 @@ struct BluetoothConnectedNotchContent: NotchContentProtocol, DynamicIslandCustom
     let applicationSettings: ApplicationSettingsStore
     
     var priority: Int { NotchContentRegistry.Bluetooth.bluetooth.priority }
+    var supportsDot: Bool { true }
+    @MainActor func dotView() -> AnyView { AnyView(BluetoothDotView(bluetoothViewModel: bluetoothViewModel)) }
     
     var strokeColor: Color {
         guard settings.bluetoothAppearanceStyle.supportsBatteryPresentation,

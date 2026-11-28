@@ -15,6 +15,8 @@ struct FocusOnNotchContent: NotchContentProtocol, DynamicIslandCustomizable {
 
     var priority: Int { NotchContentRegistry.Focus.active.priority }
     var isExpandable: Bool { true }
+    var supportsDot: Bool { true }
+    @MainActor func dotView() -> AnyView { AnyView(Image(systemName: focusModeType.icon).font(.system(size: 11, weight: .semibold)).foregroundStyle(focusModeType.tint)) }
     var appearanceStyle: FocusAppearanceStyle {
         settingsViewModel.connectivity.focusAppearanceStyle
     }

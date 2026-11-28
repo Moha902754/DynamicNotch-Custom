@@ -55,29 +55,25 @@ struct NotchInteractiveBodyView: View {
     }
 }
 
-/// Small round bubble beside the pill that shows a background activity (download ring, timer icon).
+/// Small round bubble beside the pill that shows a background activity.
 struct NotchDotView: View {
     @ObservedObject var notchViewModel: NotchViewModel
-
     private static let gap: CGFloat = 8
+
+    private var activeDotContent: NotchContentProtocol? {
+        guard !notchViewModel.isDisplayingExpandedLiveActivity else { return nil }
+        return notchViewModel.dotContent
+    }
 
     var body: some View {
         let size = notchViewModel.notchModel.baseHeight
-
         ZStack {
-            if let content = notchViewModel.dotContent {
+            if let content = activeDotContent {
                 dotBubble(for: content, size: size)
             }
         }
-        .animation(
-            .spring(response: 0.45, dampingFraction: 0.62, blendDuration: 0.2),
-            value: notchViewModel.dotContent?.id
-        )
-        .offset(
-            x: size + Self.gap,
-            y: notchViewModel.isDynamicIsland ? 6.5 : 1
-        )
-        .allowsHitTesting(false)
+        .animation(.spring(response: 0.42, dampingFraction: 0.68, blendDuration: 0.2), value: activeDotContent?.id)
+        .offset(x: size + Self.gap, y: notchViewModel.isDynamicIsland ? 6.5 : 1)
     }
 
     @MainActor
@@ -86,82 +82,129 @@ struct NotchDotView: View {
         content.dotView()
             .frame(width: size, height: size)
             .background(Circle().fill(Color.black))
+            .overlay {
+                if notchViewModel.shouldRenderStroke {
+                    Circle().stroke(content.strokeColor.opacity(0.6), lineWidth: 1.5)
+                }
+            }
             .clipShape(Circle())
+            .contentShape(Circle())
+            .onTapGesture {
+                if let link = content.windowLink {
+                    link()
+                } else {
+                    withAnimation(.spring(response: 0.38, dampingFraction: 0.78)) {
+                        notchViewModel.setPreferredLiveActivity(id: content.id)
+                    }
+                }
+            }
             .id(content.id)
-            .transition(
-                .scale(scale: 0.15, anchor: .leading)
-                    .combined(with: .opacity)
-            )
+            .transition(.scale(scale: 0.15, anchor: .leading).combined(with: .opacity))
     }
 }
 
 struct DownloadDotIndicatorView: View {
     @ObservedObject var downloadViewModel: DownloadViewModel
-
     var body: some View {
         DownloadProgressIndicatorView(
             progress: downloadViewModel.primaryDownload?.progress ?? 0.08,
-            indicatorStyle: .circle,
-            barWidth: 34,
-            barHeight: 4,
-            circleSize: 16,
-            circleLineWidth: 2.6,
-            percentFontSize: 14
+            indicatorStyle: .circle, barWidth: 34, barHeight: 4, circleSize: 16, circleLineWidth: 2.6, percentFontSize: 14
         )
     }
 }
 
-/// Download dot: white progress ring with a down arrow, a spinner while progress is unknown,
-/// and a green ring with a checkmark when the download finishes.
 struct DownloadDotRingView: View {
     @ObservedObject var downloadViewModel: DownloadViewModel
+    @State private var showThumbnail = false
 
     private let ringSize: CGFloat = 17
     private let lineWidth: CGFloat = 2.6
 
-    private var isFinished: Bool { downloadViewModel.isShowingCompletion }
+    private var isFinished: Bool { downloadViewModel.isShowingCompletion && !downloadViewModel.didFailRecently }
+    private var isFailed: Bool { downloadViewModel.isShowingCompletion && downloadViewModel.didFailRecently }
     private var progress: Double { downloadViewModel.combinedProgress }
-    private var isIndeterminate: Bool { !isFinished && progress < 0.01 }
+    private var isIndeterminate: Bool { !downloadViewModel.isShowingCompletion && progress < 0.01 }
+
+    private var isStalled: Bool {
+        guard !downloadViewModel.isShowingCompletion, let primary = downloadViewModel.primaryDownload else { return false }
+        return primary.bytesPerSecond == 0 && Date().timeIntervalSince(primary.lastUpdatedAt) > 4.0
+    }
+
+    private var ringColor: Color {
+        if isFailed { return .red }
+        if isFinished { return .green }
+        if isStalled { return .orange }
+        return .white
+    }
 
     var body: some View {
-        ZStack {
-            Circle()
-                .stroke(Color.white.opacity(0.22), lineWidth: lineWidth)
+        TimelineView(.periodic(from: .now, by: 1)) { _ in
+            ZStack {
+                if isFinished, showThumbnail, let url = downloadViewModel.lastCompletedURL {
+                    DownloadFileThumbnailView(url: url, size: 16)
+                        .clipShape(RoundedRectangle(cornerRadius: 4, style: .continuous))
+                        .transition(.scale(scale: 0.3).combined(with: .opacity))
+                } else {
+                    ringContent
+                }
 
+                if downloadViewModel.activeDownloads.count > 1 && !downloadViewModel.isShowingCompletion {
+                    Text("\(downloadViewModel.activeDownloads.count)")
+                        .font(.system(size: 7.5, weight: .heavy, design: .rounded))
+                        .foregroundStyle(.black)
+                        .padding(.horizontal, 3)
+                        .background(Capsule().fill(Color.white))
+                        .offset(x: 6.5, y: 6.5)
+                        .transition(.scale.combined(with: .opacity))
+                }
+            }
+            .frame(width: ringSize + 4, height: ringSize + 4)
+        }
+        .onChange(of: isFinished) { _, finished in
+            if finished {
+                showThumbnail = false
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.85) {
+                    if downloadViewModel.isShowingCompletion && !downloadViewModel.didFailRecently {
+                        withAnimation(.spring(response: 0.32, dampingFraction: 0.7)) { showThumbnail = true }
+                    }
+                }
+            } else {
+                showThumbnail = false
+            }
+        }
+        .animation(.spring(response: 0.35, dampingFraction: 0.6), value: isFinished)
+        .animation(.spring(response: 0.35, dampingFraction: 0.6), value: isFailed)
+    }
+
+    @ViewBuilder
+    private var ringContent: some View {
+        ZStack {
+            Circle().stroke(ringColor.opacity(0.24), lineWidth: lineWidth)
             if isIndeterminate {
                 DownloadSpinningArc(lineWidth: lineWidth)
             } else {
                 Circle()
-                    .trim(from: 0, to: isFinished ? 1 : CGFloat(min(max(progress, 0.03), 1)))
-                    .stroke(
-                        isFinished ? Color.green : Color.white,
-                        style: StrokeStyle(lineWidth: lineWidth, lineCap: .round)
-                    )
+                    .trim(from: 0, to: (isFinished || isFailed) ? 1 : CGFloat(min(max(progress, 0.03), 1)))
+                    .stroke(ringColor, style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
                     .rotationEffect(.degrees(-90))
                     .animation(.easeInOut(duration: 0.3), value: progress)
             }
 
-            if isFinished {
-                Image(systemName: "checkmark")
-                    .font(.system(size: 8, weight: .heavy))
-                    .foregroundStyle(Color.green)
-                    .transition(.scale(scale: 0.2).combined(with: .opacity))
+            if isFailed {
+                Image(systemName: "exclamationmark").font(.system(size: 8.5, weight: .heavy)).foregroundStyle(Color.red)
+            } else if isFinished {
+                Image(systemName: "checkmark").font(.system(size: 8, weight: .heavy)).foregroundStyle(Color.green)
             } else {
-                Image(systemName: "arrow.down")
-                    .font(.system(size: 7.5, weight: .bold))
-                    .foregroundStyle(Color.white)
-                    .transition(.opacity)
+                Image(systemName: "arrow.down").font(.system(size: 7.5, weight: .bold)).foregroundStyle(ringColor)
             }
         }
         .frame(width: ringSize, height: ringSize)
-        .animation(.spring(response: 0.35, dampingFraction: 0.55), value: isFinished)
     }
 }
 
 private struct DownloadSpinningArc: View {
     let lineWidth: CGFloat
     @State private var spin = false
-
     var body: some View {
         Circle()
             .trim(from: 0, to: 0.28)
@@ -169,5 +212,46 @@ private struct DownloadSpinningArc: View {
             .rotationEffect(.degrees(spin ? 360 : 0))
             .animation(.linear(duration: 0.9).repeatForever(autoreverses: false), value: spin)
             .onAppear { spin = true }
+    }
+}
+
+struct ScreenRecordingDotView: View {
+    @ObservedObject var viewModel: ScreenRecordingViewModel
+    @State private var pulse = false
+    var body: some View {
+        ZStack {
+            Circle().fill(Color.red.opacity(0.3)).frame(width: 15, height: 15).scaleEffect(pulse ? 1.25 : 0.85)
+            Circle().fill(Color.red).frame(width: 8, height: 8)
+        }
+        .onAppear {
+            withAnimation(.easeInOut(duration: 0.9).repeatForever(autoreverses: true)) { pulse = true }
+        }
+    }
+}
+
+struct BluetoothDotView: View {
+    @ObservedObject var bluetoothViewModel: BluetoothViewModel
+    var body: some View {
+        ZStack {
+            BluetoothBatteryIndicatorView(batteryLevel: bluetoothViewModel.batteryLevel, circleSize: 17, circleLineWidth: 2.2, usesTintedTrackStroke: true)
+            Image(systemName: bluetoothViewModel.deviceType.sfSymbol).font(.system(size: 7.5, weight: .semibold)).foregroundStyle(.white)
+        }
+    }
+}
+
+struct CalendarDotView: View {
+    @ObservedObject var calendarViewModel: CalendarViewModel
+    private var progress: CGFloat {
+        guard let event = calendarViewModel.nextEvent else { return 0.5 }
+        let remaining = max(0, event.startDate.timeIntervalSinceNow)
+        return CGFloat(min(max(1.0 - (remaining / 900.0), 0.08), 1.0))
+    }
+    var body: some View {
+        ZStack {
+            Circle().stroke(Color.red.opacity(0.28), lineWidth: 2.2)
+            Circle().trim(from: 0, to: progress).stroke(Color.red, style: StrokeStyle(lineWidth: 2.2, lineCap: .round)).rotationEffect(.degrees(-90))
+            Image(systemName: "calendar").font(.system(size: 7.5, weight: .bold)).foregroundStyle(.white)
+        }
+        .frame(width: 17, height: 17)
     }
 }

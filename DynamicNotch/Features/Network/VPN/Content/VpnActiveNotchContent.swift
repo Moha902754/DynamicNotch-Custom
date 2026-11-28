@@ -13,6 +13,8 @@ struct VpnActiveNotchContent: NotchContentProtocol, DynamicIslandCustomizable {
 
     var priority: Int { NotchContentRegistry.Vpn.vpn.priority }
     var isExpandable: Bool { true }
+    var supportsDot: Bool { true }
+    @MainActor func dotView() -> AnyView { AnyView(Image(systemName: "network.badge.shield.half.filled").font(.system(size: 11, weight: .semibold)).foregroundStyle(.blue)) }
 
     var minimalTimerSize: CGFloat {
         let formattedTime = formattedConnectedTime

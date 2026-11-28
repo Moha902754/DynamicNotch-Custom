@@ -7,6 +7,8 @@ final class DownloadViewModel: ObservableObject {
     @Published private(set) var activeDownloads: [DownloadModel] = []
     @Published var event: DownloadEvent?
     @Published private(set) var isShowingCompletion = false
+    @Published private(set) var lastCompletedURL: URL?
+    @Published private(set) var didFailRecently = false
     private(set) var lastCombinedProgress: Double = 0
 
     private let monitor: any DownloadMonitoring
@@ -22,12 +24,15 @@ final class DownloadViewModel: ObservableObject {
         return activeDownloads.reduce(0.0) { $0 + ($1.progress ?? 0.0) } / Double(activeDownloads.count)
     }
 
-    func beginCompletionHold() {
+    func beginCompletionHold(failed: Bool = false) {
+        didFailRecently = failed
         isShowingCompletion = true
     }
 
     func endCompletionHold() {
         isShowingCompletion = false
+        didFailRecently = false
+        lastCompletedURL = nil
     }
 
     var hasActiveDownloads: Bool {
@@ -76,8 +81,8 @@ final class DownloadViewModel: ObservableObject {
     }
 
     func openPrimaryDownloadFolder() {
-        guard let primaryDownload else { return }
-        let fileURL = primaryDownload.url
+        let targetURL = primaryDownload?.url ?? lastCompletedURL
+        guard let fileURL = targetURL else { return }
         let folderURL = fileURL.deletingLastPathComponent()
 
         if FileManager.default.fileExists(atPath: fileURL.path) {
@@ -162,8 +167,10 @@ private extension DownloadViewModel {
         let isActive = !downloads.isEmpty
 
         if !downloads.isEmpty {
-            lastCombinedProgress = downloads.reduce(0.0) { $0 + ($1.progress ?? 0.0) } / Double(downloads.count)
+            lastCombinedProgress = downloads.reduce(0.0) { $0 + $1.progress } / Double(downloads.count)
+            if let first = downloads.first { lastCompletedURL = first.isTemporaryFile ? first.url.deletingPathExtension() : first.url }
             isShowingCompletion = false
+            didFailRecently = false
         }
 
         activeDownloads = downloads
