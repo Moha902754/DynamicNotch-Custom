@@ -31,7 +31,8 @@ final class NotchDownloadEventsHandler {
                 .showLiveActivity(
                     DownloadNotchContent(
                         downloadViewModel: downloadViewModel,
-                        settingsViewModel: settingsViewModel
+                        settingsViewModel: settingsViewModel,
+                        notchViewModel: notchViewModel
                     )
                 )
             )

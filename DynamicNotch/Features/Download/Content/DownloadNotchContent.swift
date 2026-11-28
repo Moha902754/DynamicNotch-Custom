@@ -12,6 +12,7 @@ struct DownloadNotchContent: NotchContentProtocol, DynamicIslandCustomizable {
     
     let downloadViewModel: DownloadViewModel
     let settingsViewModel: SettingsViewModel
+    let notchViewModel: NotchViewModel
     
     var priority: Int { NotchContentRegistry.Media.download.priority }
     var isExpandable: Bool { true }
@@ -71,6 +72,6 @@ struct DownloadNotchContent: NotchContentProtocol, DynamicIslandCustomizable {
     
     @MainActor
     func expandedView() -> AnyView {
-        AnyView(DownloadExpandedNotchView(downloadViewModel: downloadViewModel))
+        AnyView(DownloadExpandedNotchView(downloadViewModel: downloadViewModel, notchViewModel: notchViewModel))
     }
 }

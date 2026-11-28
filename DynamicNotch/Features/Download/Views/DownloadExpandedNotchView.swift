@@ -9,6 +9,7 @@ import SwiftUI
 
 struct DownloadExpandedNotchView: View {
     @ObservedObject var downloadViewModel: DownloadViewModel
+    @ObservedObject var notchViewModel: NotchViewModel
     
     private var primaryDownload: DownloadModel? {
         downloadViewModel.primaryDownload
