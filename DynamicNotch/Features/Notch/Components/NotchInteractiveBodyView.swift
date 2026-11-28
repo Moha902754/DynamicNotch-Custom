@@ -91,24 +91,14 @@ struct NotchDotView: View {
             .clipShape(Circle())
             .contentShape(Circle())
             .onTapGesture {
-                // If this is the download dot in persistent state, click dismisses it
-                if content.id == NotchContentRegistry.Media.download.id {
-                    if let downloadContent = content as? DownloadNotchContent,
-                       downloadContent.downloadViewModel.isPersistent {
-                        withAnimation(.spring(response: 0.38, dampingFraction: 0.78)) {
-                            downloadContent.downloadViewModel.dismissPersistentDot()
-                            notchViewModel.send(.hideLiveActivity(id: content.id))
-                        }
-                        return
-                    }
-                }
-
                 if let link = content.windowLink {
                     link()
-                } else {
-                    withAnimation(.spring(response: 0.38, dampingFraction: 0.78)) {
-                        notchViewModel.setPreferredLiveActivity(id: content.id)
-                    }
+                }
+            }
+            .onLongPressGesture(minimumDuration: 0.35) {
+                withAnimation(.spring(response: 0.45, dampingFraction: 0.75)) {
+                    notchViewModel.setPreferredLiveActivity(id: content.id)
+                    notchViewModel.expandActiveLiveActivity()
                 }
             }
             .id(content.id)
