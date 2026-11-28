@@ -139,7 +139,12 @@ struct DownloadDotRingView: View {
     private var isFinished: Bool { downloadViewModel.isShowingCompletion && !downloadViewModel.didFailRecently }
     private var isFailed: Bool { downloadViewModel.isShowingCompletion && downloadViewModel.didFailRecently }
     private var progress: Double { downloadViewModel.combinedProgress }
-    private var isIndeterminate: Bool { !downloadViewModel.isShowingCompletion && progress < 0.01 }
+    // Only show spinner if we ACTUALLY have active downloads, otherwise hide the ring completely
+    private var isIndeterminate: Bool {
+        !downloadViewModel.isShowingCompletion && 
+        downloadViewModel.hasActiveDownloads && 
+        progress < 0.01
+    }
 
     private var isStalled: Bool {
         guard !downloadViewModel.isShowingCompletion, let primary = downloadViewModel.primaryDownload else { return false }
@@ -207,10 +212,8 @@ struct DownloadDotRingView: View {
         }
         .onTapGesture {
             if downloadViewModel.isPersistent {
-                withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-                    downloadViewModel.dismissPersistentDot()
-                }
-                // Force the UI to hide the dot completely so it doesn't spin
+                // Instantly clear state and signal the notch to hide the dot
+                downloadViewModel.dismissPersistentDot()
                 if let notchVM = notchViewModel {
                     notchVM.send(.hideLiveActivity(id: NotchContentRegistry.Media.download.id))
                 }
